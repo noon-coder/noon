@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lash Studio | 線上預約系統</title>
+    <title>noon studio | 線上預約系統</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js 讓頁面互動更流暢 -->
@@ -18,7 +18,7 @@
     <!-- 頂部導覽列 -->
     <header class="bg-white shadow-sm py-4 px-6 sticky top-0 z-50">
         <div class="max-w-md mx-auto flex justify-between items-center">
-            <h1 class="text-lg font-bold tracking-wider text-[#A37067]">✨ LASH STUDIO 預約系統</h1>
+            <h1 class="text-lg font-bold tracking-wider text-[#A37067]">✨ noon studio 預約系統</h1>
             <a href="https://line.me" target="_blank" class="text-xs bg-[#06C755] text-white px-3 py-1.5 rounded-full font-medium flex items-center gap-1 shadow-sm hover:opacity-90 transition">
                 <span>官方 LINE</span>
             </a>
@@ -41,12 +41,12 @@
             <form @submit.prevent="submitBooking" class="space-y-4">
                 <!-- 選擇服務 -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">選擇美睫項目</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">選擇服務項目</label>
                     <select x-model="form.service" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
                         <option value="">請選擇項目...</option>
-                        <option value="日式輕柔 3D 單根嫁接 (1.5hr) - NT$1200">日式輕柔 3D 單根嫁接 (1.5hr) - NT$1200</option>
-                        <option value="歐美濃密 6D 爆濃嫁接 (2hr) - NT$1600">歐美濃密 6D 爆濃嫁接 (2hr) - NT$1600</option>
-                        <option value="角蛋白美睫 / 睫毛管理 (1hr) - NT$1000">角蛋白美睫 / 睫毛管理 (1hr) - NT$1000</option>
+                        <option value="睫毛管理模特（2hr）">睫毛管理模特（2hr）</option>
+                        <option value="日式睫毛管理 (1.5hr左右) - NT$1200">日式睫毛管理 (1.5hr左右) - NT$1200</option>
+                        <option value="野生眉雕 (30min) - NT$600">野生眉雕 (30min) - NT$600</option>
                     </select>
                 </div>
 
@@ -61,10 +61,10 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">預約時段</label>
                     <select x-model="form.time" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
                         <option value="">請選擇時段...</option>
-                        <option value="11:00 AM">11:00 AM</option>
-                        <option value="01:30 PM">01:30 PM</option>
-                        <option value="04:00 PM">04:00 PM</option>
-                        <option value="06:30 PM">06:30 PM</option>
+                        <option value="10:00">10:00</option>
+                        <option value="12:30">12:30</option>
+                        <option value="15:00">15:00</option>
+                        <option value="17:00">17:00</option>
                     </select>
                 </div>
 
@@ -131,7 +131,7 @@
 
     <!-- 頁尾 -->
     <footer class="text-center py-4 text-xs text-gray-400">
-        &copy; 2026 LASH STUDIO. All rights reserved.
+        &copy; 2026 noon studio. All rights reserved.
     </footer>
 
     <script>
