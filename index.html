@@ -44,9 +44,9 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">選擇服務項目</label>
                     <select x-model="form.service" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
                         <option value="">請選擇項目...</option>
-                        <option value="日式睫毛管理模特（2hr）">日式睫毛管理模特（2hr）</option>
+                        <option value="日式睫毛管理模特（2hr）- NT$450">日式睫毛管理模特（2hr）- NT$450</option>
                         <option value="日式睫毛管理 (1.5hr) - NT$1200">日式睫毛管理 (1.5hr) - NT$1200</option>
-                        <option value="野生眉雕 (30min) - NT$600">野生眉雕 (30min) - NT$600</option>
+                        <option value="野生眉雕 (45min) - NT$600">野生眉雕 (45min) - NT$600</option>
                     </select>
                 </div>
 
@@ -147,23 +147,51 @@
                 submitBooking() {
                     const scriptURL = 'https://script.google.com/macros/s/AKfycbyPXki1UKgi5Vpi-hFqy_41ifw3pd0GtcpB9pwYtCCNqFoEDchfwuAYT-ygCERL-eZAYQ/exec';
                     
-                    // 儲存到本地與 Google 試算表
-                    let newBooking = { ...this.form };
-                    let existing = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
-                    existing.push(newBooking);
-                    localStorage.setItem('lash_bookings', JSON.stringify(existing));
+                    // 點擊送出前，先向 Google 試算表查詢是否已有同日同時段預約
+                    fetch(scriptURL)
+                        .then(response => response.json())
+                        .then(bookedList => {
+                            let isConflict = bookedList.some(b => b.date === this.form.date && b.time === this.form.time);
+                            
+                            if (isConflict) {
+                                alert('❌ 這個日期與時段已經被人預約囉！請選擇其他時段。');
+                                return;
+                            }
+                            
+                            // 若無衝突，儲存到瀏覽器紀錄
+                            let newBooking = { ...this.form };
+                            let existing = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
+                            existing.push(newBooking);
+                            localStorage.setItem('lash_bookings', JSON.stringify(existing));
 
-                    // 傳送至 Google 試算表後端
-                    fetch(scriptURL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify(this.form)
-                    }).then(() => {
-                        this.showSuccessModal = true;
-                        this.form = { service: '', date: '', time: '', name: '', phone: '' };
-                    }).catch(error => {
-                        alert('送出預約時發生錯誤，請稍後再試');
-                    });
+                            // 傳送至 Google 試算表後端寫入
+                            fetch(scriptURL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                body: JSON.stringify(this.form)
+                            }).then(() => {
+                                this.showSuccessModal = true;
+                                this.form = { service: '', date: '', time: '', name: '', phone: '' };
+                            }).catch(error => {
+                                alert('送出預約時發生網路錯誤，請稍後再試');
+                            });
+                        })
+                        .catch(error => {
+                            // 若查詢失敗時的備用寫入機制
+                            let newBooking = { ...this.form };
+                            let existing = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
+                            existing.push(newBooking);
+                            localStorage.setItem('lash_bookings', JSON.stringify(existing));
+
+                            fetch(scriptURL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                body: JSON.stringify(this.form)
+                            }).then(() => {
+                                this.showSuccessModal = true;
+                                this.form = { service: '', date: '', time: '', name: '', phone: '' };
+                            });
+                        });
                 },
 
                 searchBooking() {
