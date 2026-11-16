@@ -45,7 +45,7 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">選擇服務項目</label>
                     <select x-model="form.service" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
                         <option value="">請選擇項目...</option>
-                        <option value="日式睫毛管理模特（2hr）">日式睫毛管理模特（2hr）</option>
+                        <option value="日式睫毛管理模特 (2hr) - NT$450">日式睫毛管理模特 (2hr) - NT$450</option>
                         <option value="日式睫毛管理 (1.5hr) - NT$1200">日式睫毛管理 (1.5hr) - NT$1200</option>
                         <option value="野生眉雕 (30min) - NT$600">野生眉雕 (30min) - NT$600</option>
                     </select>
@@ -148,54 +148,46 @@
                 submitBooking() {
                     const scriptURL = 'https://script.google.com/macros/s/AKfycbyPXki1UKgi5Vpi-hFqy_41ifw3pd0GtcpB9pwYtCCNqFoEDchfwuAYT-ygCERL-eZAYQ/exec';
                     
-                    // 使用 JSONP 查詢目前的預約狀況以防撞期
-                    const callbackName = 'checkBooking_' + Math.round(Math.random() * 100000);
+                    // 使用 JSONP 進行嚴格防撞期與後端寫入
+                    const callbackName = 'bookCallback_' + Math.round(Math.random() * 100000);
                     
-                    window[callbackName] = (bookedList) => {
+                    const encService = encodeURIComponent(this.form.service);
+                    const encDate = encodeURIComponent(this.form.date);
+                    const encTime = encodeURIComponent(this.form.time);
+                    const encName = encodeURIComponent(this.form.name);
+                    const encPhone = encodeURIComponent(this.form.phone);
+
+                    window[callbackName] = (res) => {
                         delete window[callbackName];
-                        const scriptTag = document.getElementById('jsonp_script');
+                        const scriptTag = document.getElementById('jsonp_book_script');
                         if (scriptTag) scriptTag.remove();
 
-                        // 檢查同日期同時段是否已被預約（不限任何服務項目）
-                        let isConflict = bookedList.some(b => b.date === this.form.date && b.time === this.form.time);
-                        
-                        if (isConflict) {
-                            alert('❌ 這個日期與時段已經被人預約囉！請選擇其他時段。');
+                        if (res.status === 'duplicate') {
+                            alert('❌ 這個日期與時段剛剛已經被其他人預約走囉！同一個時段只能預約一人，請選擇其他時段。');
                             return;
+                        } else if (res.status === 'success') {
+                            // 成功後存入瀏覽器 localStorage 備用查詢
+                            let newBooking = { ...this.form };
+                            let existing = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
+                            existing.push(newBooking);
+                            localStorage.setItem('lash_bookings', JSON.stringify(existing));
+
+                            this.showSuccessModal = true;
+                            this.form = { service: '', date: '', time: '', name: '', phone: '' };
+                        } else {
+                            alert('❌ 發生伺服器錯誤，請稍後再試');
                         }
-                        
-                        // 無衝突則送出
-                        this.executeBooking(scriptURL);
                     };
 
                     const script = document.createElement('script');
-                    script.id = 'jsonp_script';
-                    script.src = `${scriptURL}?callback=${callbackName}`;
+                    script.id = 'jsonp_book_script';
+                    script.src = `${scriptURL}?action=book&service=${encService}&date=${encDate}&time=${encTime}&name=${encName}&phone=${encPhone}&callback=${callbackName}`;
                     script.onerror = () => {
                         delete window[callbackName];
                         script.remove();
-                        this.executeBooking(scriptURL);
+                        alert('❌ 網路連線異常，請檢查網路後再試');
                     };
                     document.body.appendChild(script);
-                },
-
-                executeBooking(scriptURL) {
-                    let newBooking = { ...this.form };
-                    let existing = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
-                    existing.push(newBooking);
-                    localStorage.setItem('lash_bookings', JSON.stringify(existing));
-
-                    fetch(scriptURL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify(this.form)
-                    }).then(() => {
-                        this.showSuccessModal = true;
-                        this.form = { service: '', date: '', time: '', name: '', phone: '' };
-                    }).catch(error => {
-                        this.showSuccessModal = true;
-                        this.form = { service: '', date: '', time: '', name: '', phone: '' };
-                    });
                 },
 
                 searchBooking() {
@@ -217,7 +209,5 @@
             }
         }
     </script>
-</body>
-</html>
 </body>
 </html>
