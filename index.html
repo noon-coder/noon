@@ -145,14 +145,25 @@
                 showSuccessModal: false,
                 
                 submitBooking() {
-                    // 模擬儲存到資料庫
+                    const scriptURL = 'https://script.google.com/macros/s/AKfycbyPXki1UKgi5Vpi-hFqy_41ifw3pd0GtcpB9pwYtCCNqFoEDchfwuAYT-ygCERL-eZAYQ/exec';
+                    
+                    // 儲存到本地與 Google 試算表
                     let newBooking = { ...this.form };
                     let existing = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
                     existing.push(newBooking);
                     localStorage.setItem('lash_bookings', JSON.stringify(existing));
-                    
-                    this.showSuccessModal = true;
-                    this.form = { service: '', date: '', time: '', name: '', phone: '' };
+
+                    // 傳送至 Google 試算表後端
+                    fetch(scriptURL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify(this.form)
+                    }).then(() => {
+                        this.showSuccessModal = true;
+                        this.form = { service: '', date: '', time: '', name: '', phone: '' };
+                    }).catch(error => {
+                        alert('送出預約時發生錯誤，請稍後再試');
+                    });
                 },
 
                 searchBooking() {
@@ -165,10 +176,8 @@
                     if(confirm('確定要取消這個預約嗎？')) {
                         let all = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
                         let target = this.myBookings[index];
-                        // 從總表刪除
                         all = all.filter(b => !(b.phone === target.phone && b.date === target.date && b.time === target.time));
                         localStorage.setItem('lash_bookings', JSON.stringify(all));
-                        // 重新整理查詢結果
                         this.searchBooking();
                         alert('預約已成功取消');
                     }
