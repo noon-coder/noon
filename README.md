@@ -1,1 +1,180 @@
-# noon
+# noon<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lash Studio | 線上預約系統</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js 讓頁面互動更流暢 -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FAF7F5] text-gray-800 min-h-screen flex flex-col justify-between" x-data="bookingApp()">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-white shadow-sm py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <h1 class="text-lg font-bold tracking-wider text-[#A37067]">✨ LASH STUDIO 預約系統</h1>
+            <a href="https://line.me" target="_blank" class="text-xs bg-[#06C755] text-white px-3 py-1.5 rounded-full font-medium flex items-center gap-1 shadow-sm hover:opacity-90 transition">
+                <span>官方 LINE</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="max-w-md mx-auto p-4 w-full mb-10">
+        
+        <!-- 分頁切換按鈕 -->
+        <div class="flex bg-[#EFECE9] p-1 rounded-xl mb-6">
+            <button @click="currentTab = 'book'" :class="currentTab === 'book' ? 'bg-white shadow text-[#A37067]' : 'text-gray-500'" class="flex-1 py-2 text-sm font-medium rounded-lg transition">我要預約</button>
+            <button @click="currentTab = 'query'" :class="currentTab === 'query' ? 'bg-white shadow text-[#A37067]' : 'text-gray-500'" class="flex-1 py-2 text-sm font-medium rounded-lg transition">預約查詢 / 取消</button>
+        </div>
+
+        <!-- 頁籤一：我要預約 -->
+        <div x-show="currentTab === 'book'" class="bg-white p-6 rounded-2xl shadow-sm space-y-4">
+            <h2 class="text-md font-bold text-gray-700 border-b pb-2">🌸 填寫預約資訊</h2>
+            
+            <form @submit.prevent="submitBooking" class="space-y-4">
+                <!-- 選擇服務 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">選擇美睫項目</label>
+                    <select x-model="form.service" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
+                        <option value="">請選擇項目...</option>
+                        <option value="日式輕柔 3D 單根嫁接 (1.5hr) - NT$1200">日式輕柔 3D 單根嫁接 (1.5hr) - NT$1200</option>
+                        <option value="歐美濃密 6D 爆濃嫁接 (2hr) - NT$1600">歐美濃密 6D 爆濃嫁接 (2hr) - NT$1600</option>
+                        <option value="角蛋白美睫 / 睫毛管理 (1hr) - NT$1000">角蛋白美睫 / 睫毛管理 (1hr) - NT$1000</option>
+                    </select>
+                </div>
+
+                <!-- 選擇日期 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">預約日期</label>
+                    <input type="date" x-model="form.date" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
+                </div>
+
+                <!-- 選擇時段 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">預約時段</label>
+                    <select x-model="form.time" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
+                        <option value="">請選擇時段...</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="01:30 PM">01:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="06:30 PM">06:30 PM</option>
+                    </select>
+                </div>
+
+                <!-- 姓名 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">您的姓名</label>
+                    <input type="text" x-model="form.name" placeholder="請輸入真實姓名" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
+                </div>
+
+                <!-- 電話 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">聯絡電話（作為查詢預約憑證）</label>
+                    <input type="tel" x-model="form.phone" placeholder="0912345678" class="w-full rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]" required>
+                </div>
+
+                <button type="submit" class="w-full bg-[#A37067] text-white py-3 rounded-xl font-medium shadow hover:bg-[#8e5e55] transition text-sm">
+                    確認送出預約
+                </button>
+            </form>
+        </div>
+
+        <!-- 頁籤二：預約查詢與取消 -->
+        <div x-show="currentTab === 'query'" class="bg-white p-6 rounded-2xl shadow-sm space-y-4">
+            <h2 class="text-md font-bold text-gray-700 border-b pb-2">🔍 查詢我的預約</h2>
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">請輸入您的手機號碼</label>
+                <div class="flex gap-2">
+                    <input type="tel" x-model="searchPhone" placeholder="輸入預約電話" class="flex-1 rounded-lg border border-gray-200 p-2.5 text-sm focus:outline-none focus:border-[#A37067]">
+                    <button @click="searchBooking" class="bg-gray-800 text-white px-4 py-2.5 rounded-lg text-sm hover:bg-gray-700 transition">查詢</button>
+                </div>
+            </div>
+
+            <!-- 查詢結果列表 -->
+            <div class="mt-4 space-y-3">
+                <template x-for="(item, index) in myBookings" :key="index">
+                    <div class="border border-gray-100 bg-[#FAF7F5] p-4 rounded-xl space-y-2 text-sm">
+                        <div class="flex justify-between font-bold text-gray-700">
+                            <span x-text="item.service"></span>
+                            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">已預約</span>
+                        </div>
+                        <p class="text-xs text-gray-500">📅 日期：<span x-text="item.date"></span> ⏰ 時段：<span x-text="item.time"></span></p>
+                        <p class="text-xs text-gray-500">👤 姓名：<span x-text="item.name"></span></p>
+                        <div class="pt-2 flex justify-end">
+                            <button @click="cancelBooking(index)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-3 py-1 rounded-lg bg-white">取消此預約</button>
+                        </div>
+                    </div>
+                </template>
+                <p x-show="searched && myBookings.length === 0" class="text-center text-xs text-gray-400 py-4">查無此電話的預約紀錄</p>
+            </div>
+        </div>
+
+        <!-- 預約成功彈跳通知模擬 (Modal) -->
+        <div x-show="showSuccessModal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl p-6 max-w-xs w-full text-center space-y-4 shadow-xl">
+                <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-xl">✓</div>
+                <h3 class="font-bold text-gray-800">預約成功！</h3>
+                <p class="text-xs text-gray-500 leading-relaxed">系統已記錄您的預約。我們已將確認通知發送至您的手機，並請記得加入官方 LINE 以便隨時接收變動通知喔！</p>
+                <a href="https://line.me" target="_blank" class="block bg-[#06C755] text-white py-2.5 rounded-xl text-xs font-medium">加入官方 LINE 領取優惠</a>
+                <button @click="showSuccessModal = false" class="text-xs text-gray-400 hover:text-gray-600">關閉視窗</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="text-center py-4 text-xs text-gray-400">
+        &copy; 2026 LASH STUDIO. All rights reserved.
+    </footer>
+
+    <script>
+        function bookingApp() {
+            return {
+                currentTab: 'book',
+                form: { service: '', date: '', time: '', name: '', phone: '' },
+                myBookings: [],
+                searchPhone: '',
+                searched: false,
+                showSuccessModal: false,
+                
+                submitBooking() {
+                    // 模擬儲存到資料庫
+                    let newBooking = { ...this.form };
+                    let existing = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
+                    existing.push(newBooking);
+                    localStorage.setItem('lash_bookings', JSON.stringify(existing));
+                    
+                    this.showSuccessModal = true;
+                    this.form = { service: '', date: '', time: '', name: '', phone: '' };
+                },
+
+                searchBooking() {
+                    this.searched = true;
+                    let all = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
+                    this.myBookings = all.filter(b => b.phone === this.searchPhone);
+                },
+
+                cancelBooking(index) {
+                    if(confirm('確定要取消這個預約嗎？')) {
+                        let all = JSON.parse(localStorage.getItem('lash_bookings') || '[]');
+                        let target = this.myBookings[index];
+                        // 從總表刪除
+                        all = all.filter(b => !(b.phone === target.phone && b.date === target.date && b.time === target.time));
+                        localStorage.setItem('lash_bookings', JSON.stringify(all));
+                        // 重新整理查詢結果
+                        this.searchBooking();
+                        alert('預約已成功取消');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
